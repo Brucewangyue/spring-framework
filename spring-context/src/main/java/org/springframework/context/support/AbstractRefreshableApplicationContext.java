@@ -124,9 +124,14 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			closeBeanFactory();
 		}
 		try {
+			// 初始化 BeanFactory
+			// 虽然本身 ApplicationContext 就是 BeanFactory 的子类，但是最终还是通过后面定义的实现类来处理
+			// 该类的父类中设置容器忽略3个基础Aware接口
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
 			customizeBeanFactory(beanFactory);
+
+			// 扫描并加载 bean 定义
 			loadBeanDefinitions(beanFactory);
 			this.beanFactory = beanFactory;
 		}

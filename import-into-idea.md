@@ -1,3 +1,12 @@
+## 安装依赖
+
+## 编译
+
+- 1，idea的Gradle标签页 -> spring-oxm -> Tasks -> other -> compileTestJava
+- 2，idea的Gradle标签页 -> spring-core -> Tasks -> other -> compileTestJava
+- 3，idea的Gradle标签页 -> spring -> Tasks -> build -> build
+
+
 The following has been tested against IntelliJ IDEA 2016.2.2
 
 ## Steps

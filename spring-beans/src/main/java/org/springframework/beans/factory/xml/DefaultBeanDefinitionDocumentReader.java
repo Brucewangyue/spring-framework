@@ -92,7 +92,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	@Override
 	public void registerBeanDefinitions(Document doc, XmlReaderContext readerContext) {
+		// 设置 readerContext
 		this.readerContext = readerContext;
+
+		// 解析并注册 Bean 定义
 		doRegisterBeanDefinitions(doc.getDocumentElement());
 	}
 
@@ -146,7 +149,10 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 		}
 
 		preProcessXml(root);
+
+		// // 解析并注册 Bean 定义
 		parseBeanDefinitions(root, this.delegate);
+
 		postProcessXml(root);
 
 		this.delegate = parent;
@@ -173,9 +179,13 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 				if (node instanceof Element) {
 					Element ele = (Element) node;
 					if (delegate.isDefaultNamespace(ele)) {
+
+						// 处理 beans bean import 标签等
 						parseDefaultElement(ele, delegate);
 					}
 					else {
+
+						// 处理：context: 标签，mvc: 标签 等
 						delegate.parseCustomElement(ele);
 					}
 				}
@@ -194,10 +204,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 			processAliasRegistration(ele);
 		}
 		else if (delegate.nodeNameEquals(ele, BEAN_ELEMENT)) {
+			// bean 配置的处理
 			processBeanDefinition(ele, delegate);
 		}
 		else if (delegate.nodeNameEquals(ele, NESTED_BEANS_ELEMENT)) {
 			// recurse
+			// 递归 beans
 			doRegisterBeanDefinitions(ele);
 		}
 	}
