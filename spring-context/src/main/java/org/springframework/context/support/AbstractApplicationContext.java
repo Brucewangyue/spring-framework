@@ -574,26 +574,44 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				invokeBeanFactoryPostProcessors(beanFactory);
 
 				// Register bean processors that intercept bean creation.
-				// 注册容器中配置的 BeanPostProcessor
+				// 实例化并且注册容器中配置的 BeanPostProcessor
 				registerBeanPostProcessors(beanFactory);
 				beanPostProcess.end();
 
 				// Initialize message source for this context.
+				// 国际化
+				// spring mvc 的时候有关联
 				initMessageSource();
 
 				// Initialize event multicaster for this context.
+				// 初始化事件多播器
+				// 这里是传统观察者模式的升级 发布订阅
+				//		传统观察者模式：被观察者、观察者，被观察者自己添加观察者，被观察者自己触发观察者的调用
+				//		spring 中 发布订阅：监听器、事件、多播器、事件源，是又事件驱动，多播器控制
+				// 一个监听器是如何处理多个类型的事件的？
+				//		想要一个监听器处理多个类型，那么这多个类型都有同一个父类即可
 				initApplicationEventMulticaster();
 
 				// Initialize other special beans in specific context subclasses.
+				// 模板方法
 				onRefresh();
 
 				// Check for listener beans and register them.
+				// 添加监听器、执行 earlyApplicationEvents 集合中的事件
 				registerListeners();
 
 				// Instantiate all remaining (non-lazy-init) singletons.
+				// 重点：开始将Bean定义实例化
+				// 创建对象的几种方式
+				//		InstantiationAwareBeanPostProcessor
+				//		FactoryBean
+				//		反射
+				//		FactoryMethod
+				//		Supplier
 				finishBeanFactoryInitialization(beanFactory);
 
 				// Last step: publish corresponding event.
+				// 事件多播器发布相应的事件
 				finishRefresh();
 			}
 
@@ -797,6 +815,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initMessageSource() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+
+		// 关键接口 MessageSource
+		// 类的关键字 messageSource
 		if (beanFactory.containsLocalBean(MESSAGE_SOURCE_BEAN_NAME)) {
 			this.messageSource = beanFactory.getBean(MESSAGE_SOURCE_BEAN_NAME, MessageSource.class);
 			// Make MessageSource aware of parent MessageSource.
@@ -831,6 +852,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initApplicationEventMulticaster() {
 		ConfigurableListableBeanFactory beanFactory = getBeanFactory();
+
+		// 关键字 applicationEventMulticaster
 		if (beanFactory.containsLocalBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME)) {
 			this.applicationEventMulticaster =
 					beanFactory.getBean(APPLICATION_EVENT_MULTICASTER_BEAN_NAME, ApplicationEventMulticaster.class);
@@ -891,6 +914,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void registerListeners() {
 		// Register statically specified listeners first.
+		// 注册静态指定的监听器，就是直接写死的，包括自定义的
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
@@ -918,6 +942,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
 		// Initialize conversion service for this context.
+		// 初始化类型转换器
+		//		mvc 中的http入参字符串转换成相应的java类型
+		// 关键字 conversionService
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
 			beanFactory.setConversionService(
@@ -927,6 +954,8 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Register a default embedded value resolver if no BeanFactoryPostProcessor
 		// (such as a PropertySourcesPlaceholderConfigurer bean) registered any before:
 		// at this point, primarily for resolution in annotation attribute values.
+		// 前入值解析器
+		// 这个值是在 PropertySourcesPlaceholderConfigurer 中被设置
 		if (!beanFactory.hasEmbeddedValueResolver()) {
 			beanFactory.addEmbeddedValueResolver(strVal -> getEnvironment().resolvePlaceholders(strVal));
 		}
@@ -938,13 +967,16 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Stop using the temporary ClassLoader for type matching.
+		// 禁止使用临时类加载器进行类型匹配
 		beanFactory.setTempClassLoader(null);
 
 		// Allow for caching all bean definition metadata, not expecting further changes.
+		// 冻结所有bean定义
 		beanFactory.freezeConfiguration();
 
 		// Instantiate all remaining (non-lazy-init) singletons.
-		// 实例化所有单例对象
+		// 实例化剩余所有单例对象
+		//		前面已经实例化了一些需要用到的内部bean和自定义扩展bean
 		beanFactory.preInstantiateSingletons();
 	}
 

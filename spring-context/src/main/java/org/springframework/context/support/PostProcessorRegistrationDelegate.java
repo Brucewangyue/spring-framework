@@ -247,8 +247,11 @@ final class PostProcessorRegistrationDelegate {
 		// Register BeanPostProcessorChecker that logs an info message when
 		// a bean is created during BeanPostProcessor instantiation, i.e. when
 		// a bean is not eligible for getting processed by all BeanPostProcessors.
+		// 记录 beanProcessor 的总数，+1 表示 BeanPostProcessorChecker
 		int beanProcessorTargetCount = beanFactory.getBeanPostProcessorCount() + 1 + postProcessorNames.length;
+		// BeanPostProcessorChecker 貌似只是做一个日志记录
 		beanFactory.addBeanPostProcessor(new BeanPostProcessorChecker(beanFactory, beanProcessorTargetCount));
+
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
@@ -256,6 +259,16 @@ final class PostProcessorRegistrationDelegate {
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
 		List<String> orderedPostProcessorNames = new ArrayList<>();
 		List<String> nonOrderedPostProcessorNames = new ArrayList<>();
+
+		//
+		// InstantiationAwareBeanPostProcessor
+		// bean被销毁前
+		// DestructionAwareBeanPostProcessor
+		// 用于解决循环依赖
+		// SmartInstantiationAwareBeanPostProcessor
+		// 合并父子类
+		// MergedBeanDefinitionPostProcessor
+
 		for (String ppName : postProcessorNames) {
 			if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
 				BeanPostProcessor pp = beanFactory.getBean(ppName, BeanPostProcessor.class);
@@ -305,6 +318,10 @@ final class PostProcessorRegistrationDelegate {
 
 		// Re-register post-processor for detecting inner beans as ApplicationListeners,
 		// moving it to the end of the processor chain (for picking up proxies etc).
+
+		// 第一次是在 refresh 的 prepareBeanFactory 方法中被注册
+		// 这里重新注册的原因：
+		// todo
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
 	}
 

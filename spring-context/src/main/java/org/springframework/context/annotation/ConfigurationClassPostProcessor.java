@@ -267,6 +267,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (!this.registriesPostProcessed.contains(factoryId)) {
 			// BeanDefinitionRegistryPostProcessor hook apparently not supported...
 			// Simply call processConfigurationClasses lazily at this point then.
+			// 处理
 			processConfigBeanDefinitions((BeanDefinitionRegistry) beanFactory);
 		}
 
@@ -276,13 +277,18 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 
 	/**
 	 * springboot 自动装配
-	 *
+	 * 通过解析配置类，递归处理各种@Import @Bean 等注解修饰的类或方法
+	 * 		其中@Import的处理中完成了 springboot 的自动装配
+	 * 			AutoConfig
+	 * 最终将解析出来的数组组装成Bean定义
 	 *
 	 * Build and validate a configuration model based on the registry of
 	 * {@link Configuration} classes.
 	 */
 	public void processConfigBeanDefinitions(BeanDefinitionRegistry registry) {
 		List<BeanDefinitionHolder> configCandidates = new ArrayList<>();
+
+		// 存放符合注解条件的类限定名
 		String[] candidateNames = registry.getBeanDefinitionNames();
 
 		for (String beanName : candidateNames) {
@@ -292,6 +298,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 					logger.debug("Bean definition has already been processed as a configuration class: " + beanDef);
 				}
  			}
+			// 检查类的注解是否包含 @Configuration @Import @ComponentScan 等等
 			else if (ConfigurationClassUtils.checkConfigurationClassCandidate(beanDef, this.metadataReaderFactory)) {
 				configCandidates.add(new BeanDefinitionHolder(beanDef, beanName));
 			}
@@ -301,6 +308,11 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		if (configCandidates.isEmpty()) {
 			return;
 		}
+
+
+		// 开始 循环解析配置类
+		// 	解析的过程很复杂，要解析配置类的父接口，父类，属性等等
+		// 	对于包含@Import等注解的 还要再递归检查
 
 		// Sort by previously determined @Order value, if applicable
 		configCandidates.sort((bd1, bd2) -> {
@@ -337,6 +349,7 @@ public class ConfigurationClassPostProcessor implements BeanDefinitionRegistryPo
 		Set<ConfigurationClass> alreadyParsed = new HashSet<>(configCandidates.size());
 		do {
 			StartupStep processConfig = this.applicationStartup.start("spring.context.config-classes.parse");
+			// 开始解析
 			parser.parse(candidates);
 			parser.validate();
 

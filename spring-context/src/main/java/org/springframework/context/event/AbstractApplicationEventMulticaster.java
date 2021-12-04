@@ -64,6 +64,7 @@ import org.springframework.util.ObjectUtils;
 public abstract class AbstractApplicationEventMulticaster
 		implements ApplicationEventMulticaster, BeanClassLoaderAware, BeanFactoryAware {
 
+	// 存放事件监听器，内部使用的Set来存储不可重复的监听器
 	private final DefaultListenerRetriever defaultRetriever = new DefaultListenerRetriever();
 
 	final Map<ListenerCacheKey, CachedListenerRetriever> retrieverCache = new ConcurrentHashMap<>(64);

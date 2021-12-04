@@ -26,6 +26,10 @@ import org.springframework.core.convert.converter.ConverterRegistry;
 import org.springframework.lang.Nullable;
 
 /**
+ * Converter：1对1转换
+ * GenericConverter：1对多转换
+ * ConverterFactory：多对多转换
+ *
  * A specialization of {@link GenericConversionService} configured by default
  * with converters appropriate for most environments.
  *
