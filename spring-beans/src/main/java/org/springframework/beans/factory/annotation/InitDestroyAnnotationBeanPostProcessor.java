@@ -147,6 +147,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	@Override
 	public void postProcessMergedBeanDefinition(RootBeanDefinition beanDefinition, Class<?> beanType, String beanName) {
 		LifecycleMetadata metadata = findLifecycleMetadata(beanType);
+		// @PostConstruct和@PreDestroy修饰的方法设置进bean定义
 		metadata.checkConfigMembers(beanDefinition);
 	}
 
@@ -207,6 +208,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			synchronized (this.lifecycleMetadataCache) {
 				metadata = this.lifecycleMetadataCache.get(clazz);
 				if (metadata == null) {
+					// 这里开始解析
 					metadata = buildLifecycleMetadata(clazz);
 					this.lifecycleMetadataCache.put(clazz, metadata);
 				}

@@ -399,6 +399,7 @@ class ConstructorResolver {
 
 		Object factoryBean;
 		Class<?> factoryClass;
+		// 是否静态
 		boolean isStatic;
 
 		String factoryBeanName = mbd.getFactoryBeanName();

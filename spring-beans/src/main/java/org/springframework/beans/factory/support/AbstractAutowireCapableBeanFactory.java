@@ -588,6 +588,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			throws BeanCreationException {
 
 		// Instantiate the bean.
+		// ##############
+		// 实例化bean
+		// ##############
 		BeanWrapper instanceWrapper = null;
 		if (mbd.isSingleton()) {
 			// 如果另外单独配置了factoryBean所管理的类，那么会覆盖 factoryBeanInstanceCache
@@ -604,6 +607,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Allow post-processors to modify the merged bean definition.
+		// 补充bean定义的bean后置处理器
+		// CommonAnnotationBeanPostProcessor
+		// 	@PostConstruct @PreDestroy @Resource
+		// AutowiredAnnotationBeanPostProcessor
+		//	@Autowired @Value @Inject
 		synchronized (mbd.postProcessingLock) {
 			if (!mbd.postProcessed) {
 				try {
@@ -616,6 +624,10 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				mbd.postProcessed = true;
 			}
 		}
+
+		// ##############
+		// 初始化
+		// ##############
 
 		// Eagerly cache singletons to be able to resolve circular references
 		// even when triggered by lifecycle interfaces like BeanFactoryAware.
@@ -1204,17 +1216,22 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 					"Bean class isn't public, and non-public access not allowed: " + beanClass.getName());
 		}
 
-		//
+		// 通过实现BeanFactoryPostProcessor接口，然后在方法里面获取到bean定义，设置supplier属性
+		// 实际效果类似FactoryBean
 		Supplier<?> instanceSupplier = mbd.getInstanceSupplier();
 		if (instanceSupplier != null) {
 			return obtainFromSupplier(instanceSupplier, beanName);
 		}
 
+		// 工厂方法： bean标签里面的factory-method，实现了静态工厂和实例工厂，实际上很少用
+		// 里面包含了如何解析泪的方法的反射代码，比如重载方法如何获取，静态方法如何调用，实例方法如何调用等
 		if (mbd.getFactoryMethodName() != null) {
 			return instantiateUsingFactoryMethod(beanName, mbd, args);
 		}
 
+
 		// Shortcut when re-creating the same bean...
+		// 原型bean创建构造器缓存，由于原型bean在创建时需要解析找到合适的构造函数，为了避免每次解析的性能消耗，这里做了个缓存
 		boolean resolved = false;
 		boolean autowireNecessary = false;
 		if (args == null) {
