@@ -129,6 +129,7 @@ public abstract class AbstractRefreshableApplicationContext extends AbstractAppl
 			// 该类的父类中设置容器忽略3个基础Aware接口
 			DefaultListableBeanFactory beanFactory = createBeanFactory();
 			beanFactory.setSerializationId(getId());
+			// 配置是否允许循环依赖
 			customizeBeanFactory(beanFactory);
 
 			// 扫描并加载 bean 定义
