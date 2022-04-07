@@ -253,7 +253,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object beanInstance;
 
 		// Eagerly check singleton cache for manually registered singletons.
-		// 先从一级缓存中获取实例
+		// 从三级缓存中获取对象
+		// 内部的 isSingletonCurrentlyInCreation 方法会检测下面的 getSingleton 设置的状态位
+		// 	来判断是否可以在二级缓存中取到正在创建中的bean，循环依赖的时候 二级依赖类在设置一级依赖类的时候会用到
+		// 	A-> [ B->A ]
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -305,7 +308,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
-			// 标记已经创建好的bean
+			// 如果不是类型检测，将bean加入创建中集合
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
@@ -341,10 +344,12 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Create bean instance.
 				// 单例bean处理逻辑
-				// 开始创建 Bean 实例
 				if (mbd.isSingleton()) {
+					// getSingleton 方法设置当前bean的状态为 正在创建中~
+					//
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							// 开始创建 Bean 实例
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
