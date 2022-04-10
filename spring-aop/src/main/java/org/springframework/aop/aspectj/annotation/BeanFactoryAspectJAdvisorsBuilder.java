@@ -89,6 +89,13 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
 					aspectNames = new ArrayList<>();
+					/**
+					 * AOP在这里传入的是 Object.class ，表示获取容器中所有的组件名称
+					 * 然后再遍历，这个过程十分消耗性能，所以spring会在这里加入了保存切面信息的缓存
+					 *
+					 * 但是事务功能不一样，事务模块的功能是直接去容器中获取advisor类型，选择范围小，且不消耗性能
+					 * 所以spring在事务模块中没有加入缓存来保存我们事务相关的advisor
+					 */
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
 					for (String beanName : beanNames) {

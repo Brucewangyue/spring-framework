@@ -536,6 +536,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			// 如果自定义了实现了 InstantiationAwareBeanPostProcessor 接口的类
+			// AOP就是通过实现 InstantiationAwareBeanPostProcessor 来扩展的
 			// 在实现类里直接返回了对象，则不走下面的 doCreateBean 方法
 			// 扩展：
 			//		在实现类里对指定的对象做代理逻辑然后返回
@@ -1342,6 +1343,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Candidate constructors for autowiring?
+		// 以下情况符合其一即可进入
+		// 1.存在可选的构造方法
+		// 2.自动装配模型为构造函数自动装配
+		// 3.给BeanDefinition中设置了构造参数值
+		// 4.有参与构造函数参数列表的参数
 		Constructor<?>[] ctors = determineConstructorsFromBeanPostProcessors(beanClass, beanName);
 		if (ctors != null || mbd.getResolvedAutowireMode() == AUTOWIRE_CONSTRUCTOR ||
 				mbd.hasConstructorArgumentValues() || !ObjectUtils.isEmpty(args)) {
@@ -1349,13 +1355,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		// Preferred constructors for default construction?
+		// 找出最合适的默认构造方法
 		ctors = mbd.getPreferredConstructors();
 		if (ctors != null) {
 			return autowireConstructor(beanName, mbd, ctors, null);
 		}
 
 		// No special handling: simply use no-arg constructor.
-		// 实例化
+		// 使用默认无参构造函数创建对象
 		return instantiateBean(beanName, mbd);
 	}
 

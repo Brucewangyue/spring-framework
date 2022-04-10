@@ -59,11 +59,16 @@ public class DefaultAdvisorChainFactory implements AdvisorChainFactory, Serializ
 		Class<?> actualClass = (targetClass != null ? targetClass : method.getDeclaringClass());
 		Boolean hasIntroductions = null;
 
+		// 前面在实例化advisor的时候已经匹配过一次了，不过是模糊匹配，只要某个类的某个方法满足aspect中的一个advisor就直接匹配了
+		// 循环目标方法匹配的所有advisor
 		for (Advisor advisor : advisors) {
+			//
 			if (advisor instanceof PointcutAdvisor) {
 				// Add it conditionally.
 				PointcutAdvisor pointcutAdvisor = (PointcutAdvisor) advisor;
+				// 先匹配类
 				if (config.isPreFiltered() || pointcutAdvisor.getPointcut().getClassFilter().matches(actualClass)) {
+					// 开始判断当前advisor能否匹配目标方法
 					MethodMatcher mm = pointcutAdvisor.getPointcut().getMethodMatcher();
 					boolean match;
 					if (mm instanceof IntroductionAwareMethodMatcher) {

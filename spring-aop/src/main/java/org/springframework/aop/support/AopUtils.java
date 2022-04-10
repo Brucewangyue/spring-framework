@@ -314,6 +314,7 @@ public abstract class AopUtils {
 		}
 		boolean hasIntroductions = !eligibleAdvisors.isEmpty();
 		for (Advisor candidate : candidateAdvisors) {
+			// "引入" advisor，一般都不用
 			if (candidate instanceof IntroductionAdvisor) {
 				// already processed
 				continue;
